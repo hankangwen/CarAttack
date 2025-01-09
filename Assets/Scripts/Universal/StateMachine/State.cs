@@ -3,19 +3,15 @@ using System;
 
 public abstract class State : MonoBehaviour {
 
-    [SerializeField] private string _stateID;
-    public string stateID => _stateID;
+    public abstract string stateID { get; }
 
-    public abstract State RunCurrentState();
+    public abstract State RunCurrentState(float deltaTime);
 
-    public virtual void Init()
-    {
-
-    }
-
-    public virtual State RunCurrentStateCustomUpdate() => this;
+    public abstract void Init(InitArgs args);
 
     public virtual void RunOnStart() { }
 
     public virtual void RunOnExit() { }
 }
+
+public enum BasicStates { Idle, Attack }

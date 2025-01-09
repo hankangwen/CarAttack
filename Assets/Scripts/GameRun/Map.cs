@@ -6,7 +6,10 @@ using UnityEngine;
 public class Map : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private float enemyStartSpawnDist;
     [SerializeField] private EnvironmentGenerator mapGenerator;
+    [SerializeField] private EnemySpawner enemySpawner;
+
     private Coroutine gameRunRoutine;
 
     private void Start()
@@ -17,6 +20,7 @@ public class Map : MonoBehaviour
         camControler.Init(car);
         mapGenerator.Init(car);
         mapGenerator.GenerateMap(transform.position);
+        enemySpawner.Init(car);
         StartRun(carController, camControler);
     }
 
@@ -29,6 +33,7 @@ public class Map : MonoBehaviour
     private IEnumerator GameRunningRoutine(CarController carController, CameraController camControler)
     {
         Vector3 targetCarPosition = carController.transform.position;
+        enemySpawner.StartSpawning(transform.position + new Vector3(0,0, enemyStartSpawnDist));
         do
         {
             float deltaTime = Time.deltaTime;
@@ -37,6 +42,7 @@ public class Map : MonoBehaviour
             carController.Move(targetCarPosition, deltaTime);
             camControler.Follow(deltaTime);
             mapGenerator.CustomUpdate(deltaTime);
+            enemySpawner.CustomUpdate(deltaTime);
             yield return new WaitForEndOfFrame();
         } while (true);
     }

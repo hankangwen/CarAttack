@@ -1,35 +1,52 @@
+using System.Linq;
 using UnityEngine;
 
 
 public class StateManager : MonoBehaviour
 {
-    [SerializeField] private State currentState;
-    [SerializeField] private float customUpdateInterval;
-
     [SerializeField] private State[] allPossibleStates;
 
-    [SerializeField] private bool manualStart;
+    public bool isRunning { get; private set; }
+
+    private State currentState;
     private State _nextState;
 
-    public State CurrentState => currentState;
-
-    public void Run()
+    public void Run(string stateID)
     {
-        //StartCustomUpdate(customUpdateInterval);
+        isRunning = true;
+        currentState = allPossibleStates.FirstOrDefault(State => State.stateID == stateID);
         currentState?.RunOnStart();
     }
 
-    public void Init()
+    public void Stop()
     {
-
+        currentState?.RunOnExit();
+        isRunning = false;
     }
 
-    private void Update() { RunStateMachine(); }
+    public void Init(InitArgs args)
+    {
+        foreach (State state in allPossibleStates)
+        {
+            try
+            {
+                state.Init(args);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"StateManager.Init. Failed initialization of state \"{state.stateID}\" " +
+                    $"with exception: {ex.Message}");
+            }
+
+        }
+    }
+
+    private void Update() { if(isRunning) RunStateMachine(); }
 
     private void RunStateMachine()
     {
-        _nextState = currentState?.RunCurrentState();
-        if (_nextState != null) SwitchToTheNextState(_nextState);
+        _nextState = currentState?.RunCurrentState(Time.deltaTime);
+        if (_nextState != currentState) SwitchToTheNextState(_nextState);
     }
 
     private void SwitchToTheNextState(State _nextState)
@@ -40,7 +57,6 @@ public class StateManager : MonoBehaviour
             currentState.RunOnExit();
             _nextState.RunOnStart();
         }
-
         currentState = _nextState;
     }
 }

@@ -1,21 +1,34 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Car : MonoBehaviour
+public class Car : MonoBehaviour, IDestroyableEntity
 {
+    [SerializeField] private Vitality _vitality;
     [SerializeField] private CarMovement _movement;
     [SerializeField] private List<Gun> guns;
 
+    public Action onDie { get; set; }
+
     public CarMovement movement => _movement;
+    public Vitality vitality => _vitality;
+
 
     private void Start()
     {
         _movement.Init(this);
+        _vitality.Init();
         foreach (Gun gun in guns)
         {
             gun.Init(this);
         }
+        _vitality.onHealthFinishes += CarDestroyed;
+    }
+
+    private void CarDestroyed()
+    {
+        onDie?.Invoke();
     }
 }
 
