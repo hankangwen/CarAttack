@@ -24,6 +24,7 @@ public class DefStickmanIdleState : State
 
     public override State RunCurrentState(float deltaTime)
     {
+        if (car.vitality.hp <= 0) return this;
         if((enemy.transform.position - car.transform.position).magnitude < enemy.playerDetectionDist)
         {
             return stickmanAttackState;

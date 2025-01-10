@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class DefStickmanAttackState : State
 {
+    [SerializeField] private DefStickmanIdleState stickmanIdleState;
     private StickmanEnemy enemy;
     private Car car;
     public override string stateID => BasicStates.Attack.ToString();
@@ -21,8 +22,8 @@ public class DefStickmanAttackState : State
 
     public override State RunCurrentState(float deltaTime)
     {
-        bool reached;
-        enemy.movement.MoveAtDestination(car.transform.position, deltaTime, out reached);
+        if (car.vitality.hp <= 0) return stickmanIdleState;
+        enemy.movement.MoveAtDestination(car.transform.position, deltaTime);
         return this;
     }
 

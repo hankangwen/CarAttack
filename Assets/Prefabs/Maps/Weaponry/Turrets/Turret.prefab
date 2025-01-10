@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 280695956361117673}
   - component: {fileID: 6153365909145865801}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Turret
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.39, z: 0}
-  m_LocalScale: {x: 15, y: 15, z: 15}
+  m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 710659589825586407}
@@ -49,7 +49,8 @@ MonoBehaviour:
   projectilePrefab: {fileID: -4718574047493494576, guid: 766478cca831408479c907f9b2b4b09d,
     type: 3}
   nozzle: {fileID: 2092949299205203482}
-  shootSpeed: 0.5
+  shootSpeed: 0.6
+  damage: 5
 --- !u!1 &6871745091855540003
 GameObject:
   m_ObjectHideFlags: 0
@@ -59,7 +60,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2092949299205203482}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: nozzle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -158,6 +159,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: model
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c4cec301bb714bb4f927388c0cbcc5f1,
+        type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

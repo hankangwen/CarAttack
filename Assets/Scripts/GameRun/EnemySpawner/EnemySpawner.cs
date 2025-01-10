@@ -23,7 +23,7 @@ public class EnemySpawner : MonoBehaviour
     public void StartSpawning(Vector3 spawnOrigin)
     {
         enemyLines = new LinkedList<EnemyLine>();
-        SpawnLinesWhileInGenDist(spawnOrigin);
+        SpawnLinesWhileInGenDist(spawnOrigin, spawnOrigin);
     }
 
     public void CustomUpdate(float deltaTime)
@@ -39,14 +39,15 @@ public class EnemySpawner : MonoBehaviour
         EnemyLine firstLine = enemyLines.First.Value;
         if (firstLine.position.z - car.transform.position.z < distForEnemiesToGen)
         {
-            SpawnLinesWhileInGenDist(firstLine.position + new Vector3(0, 0, distanceBetweenLines));
+            SpawnLinesWhileInGenDist(firstLine.position + new Vector3(0, 0, distanceBetweenLines),
+                car.transform.position);
         }
     }
 
-    private void SpawnLinesWhileInGenDist(Vector3 spawnOrigin)
+    private void SpawnLinesWhileInGenDist(Vector3 spawnOrigin, Vector3 pointToCalcDist)
     {
         Vector3 linePos = spawnOrigin;
-        while (Mathf.Abs(spawnOrigin.z - linePos.z) < distForEnemiesToGen)
+        while (Mathf.Abs(pointToCalcDist.z - linePos.z) < distForEnemiesToGen)
         {
             EnemyLine enemyLine = new EnemyLine(linePos);
             int enemyCount = Random.Range(0, maxEnemiesCountOnLine);
@@ -57,6 +58,7 @@ public class EnemySpawner : MonoBehaviour
                 enemyToAdd.transform.position = linePos +
                     new Vector3(Random.Range(-maxEnemyXOffset, maxEnemyXOffset), 0);
                 enemyToAdd.Activate();
+                enemyToAdd.vitality.HealToMax();
                 enemyCount--;
             }
             enemyLines.AddFirst(enemyLine);

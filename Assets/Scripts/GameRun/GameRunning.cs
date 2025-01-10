@@ -1,9 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
 using UnityEngine;
 
-public class Map : MonoBehaviour
+public class GameRunning : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private float enemyStartSpawnDist;
@@ -21,29 +22,37 @@ public class Map : MonoBehaviour
         mapGenerator.Init(car);
         mapGenerator.GenerateMap(transform.position);
         enemySpawner.Init(car);
-        StartRun(carController, camControler);
+        StartRun(car, carController, camControler);
     }
 
-    public void StartRun(CarController carController, CameraController camControler)
+    public void StartRun(Car car, CarController carController, CameraController camControler)
     {
         if (gameRunRoutine != null) throw new System.Exception("Map.StartRun failed. Cant start GameRunningRoutine twoce");
-        gameRunRoutine = StartCoroutine(GameRunningRoutine(carController, camControler));
+        gameRunRoutine = StartCoroutine(GameRunningRoutine(car, carController, camControler));
     }
 
-    private IEnumerator GameRunningRoutine(CarController carController, CameraController camControler)
+    private IEnumerator GameRunningRoutine(Car car, CarController carController, CameraController camControler)
     {
+        bool stopGame = false;
+        Action stopGameAction = () => stopGame = true;
         Vector3 targetCarPosition = carController.transform.position;
         enemySpawner.StartSpawning(transform.position + new Vector3(0,0, enemyStartSpawnDist));
+        car.onDie += stopGameAction;
+        camControler.StartFollowingCar();
+        car.Activate();
         do
         {
             float deltaTime = Time.deltaTime;
 
             targetCarPosition += new Vector3(0, 0, moveSpeed * deltaTime);
             carController.Move(targetCarPosition, deltaTime);
-            camControler.Follow(deltaTime);
             mapGenerator.CustomUpdate(deltaTime);
             enemySpawner.CustomUpdate(deltaTime);
+            if(stopGame) break;
             yield return new WaitForEndOfFrame();
         } while (true);
+        camControler.StopFollowingCar();
+        car.Deactivate();
+        car.onDie -= stopGameAction;
     }
 }

@@ -11,10 +11,16 @@ public class Movement : MonoBehaviour
         this.enemy = enemy;
     }
 
+
+    public void MoveAtDestination(Vector3 position, float deltaTime)
+    {
+        MoveAtDestination(position, deltaTime, out bool reached);
+    }
+
     public void MoveAtDestination(Vector3 position, float deltaTime, out bool reached)
     {
         Vector3 toTargetDirection = position - transform.position;
-        if(toTargetDirection.magnitude < 0.01f)
+        if(toTargetDirection.magnitude < 0.1f)
         {
             reached = true;
             return;
