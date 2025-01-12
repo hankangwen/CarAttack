@@ -49,7 +49,7 @@ MonoBehaviour:
   projectilePrefab: {fileID: -4718574047493494576, guid: 766478cca831408479c907f9b2b4b09d,
     type: 3}
   nozzle: {fileID: 2092949299205203482}
-  shootSpeed: 0.6
+  shootSpeed: 0.3
   damage: 5
 --- !u!1 &6871745091855540003
 GameObject:

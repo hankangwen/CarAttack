@@ -85,7 +85,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3548588485384254794, guid: 2f9e7dc163581394da1e00b561eed65d,
         type: 3}
+      propertyPath: CollisionModule.type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3548588485384254794, guid: 2f9e7dc163581394da1e00b561eed65d,
+        type: 3}
       propertyPath: InitialModule.size3D
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3548588485384254794, guid: 2f9e7dc163581394da1e00b561eed65d,
+        type: 3}
+      propertyPath: CollisionModule.enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3548588485384254794, guid: 2f9e7dc163581394da1e00b561eed65d,
+        type: 3}
+      propertyPath: CollisionModule.quality
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3548588485384254794, guid: 2f9e7dc163581394da1e00b561eed65d,
@@ -111,7 +126,12 @@ PrefabInstance:
     - target: {fileID: 3548588485384254794, guid: 2f9e7dc163581394da1e00b561eed65d,
         type: 3}
       propertyPath: InitialModule.startSize.minScalar
-      value: 0.025
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 3548588485384254794, guid: 2f9e7dc163581394da1e00b561eed65d,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.scalar
+      value: 1.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

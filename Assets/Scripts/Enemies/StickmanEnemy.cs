@@ -11,6 +11,7 @@ public class StickmanEnemy : MonoBehaviour, IPooledObject, IDestroyableEntity, I
     [SerializeField] private float _runSpeed;
     [SerializeField] private float _rotSpeed;
     [SerializeField] private float _damage;
+    [SerializeField] private Vector2Int mimMaxHp;
 
     [Header("necessary systems")]
     [SerializeField] private Vitality _vitality;
@@ -50,7 +51,8 @@ public class StickmanEnemy : MonoBehaviour, IPooledObject, IDestroyableEntity, I
     public void Die()
     {
         gameObject.SetActive(false);
-        Instantiate(deathParticles,transform.position,Quaternion.identity);
+        Instantiate(deathParticles,transform.position + new Vector3(0, 0.725f),Quaternion.identity);
+        transform.position = Vector3.zero;
         onDie?.Invoke();
     }
 
@@ -63,7 +65,7 @@ public class StickmanEnemy : MonoBehaviour, IPooledObject, IDestroyableEntity, I
                         .AddArgument<Car>(car);
         _stateMachine.Init(initArgs);
         _movement.Init(this);
-        _vitality.Init();
+        _vitality.Init(UnityEngine.Random.Range(mimMaxHp.x, mimMaxHp.y + 1));
         _vitality.onHealthFinishes += Die;
         gameObject.SetActive(false);
     }

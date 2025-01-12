@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,11 @@ using UnityEngine;
 public class CameraController : MonoBehaviour
 {
     [SerializeField] private Vector3 offset;
+    [SerializeField] private Quaternion carFollowRotation;
     [SerializeField] private bool ignoreTargetXPos;
+    [Header("Idle pos")]
+    [SerializeField] private Vector3 camIdlePos;
+    [SerializeField] private Quaternion camIdleRotation;
     private Coroutine followingRoutine;
     private Car car;
 
@@ -14,7 +19,7 @@ public class CameraController : MonoBehaviour
         this.car = car;
     }
 
-
+    #region car following
     public void StartFollowingCar()
     {
         if (followingRoutine != null) return;
@@ -38,4 +43,37 @@ public class CameraController : MonoBehaviour
             yield return new WaitForEndOfFrame();
         } while (true);
     }
+
+    public IEnumerator moveToCarFollowingPositionAndRotation()
+    {
+        return moveToOrientation(car.transform.position + offset, carFollowRotation);
+    }
+
+    public IEnumerator moveToIdleFollowingPositionAndRotation()
+    {
+        return moveToOrientation(camIdlePos, camIdleRotation);
+    }
+    #endregion
+
+    public IEnumerator moveToOrientation(Vector3 position, Quaternion rotation)
+    {
+        yield return new WaitForEndOfFrame();
+        Sequence sequence = DOTween.Sequence()
+            .Append(transform.DOMove(position, 1))
+            .Join(transform.DORotateQuaternion(rotation, 1));
+        bool animCompleted = false;
+        sequence.OnComplete(() =>
+        {
+            animCompleted = true;
+            transform.position = position;
+            transform.rotation = rotation;
+        });
+
+        while (!animCompleted)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+    }
+
+
 }

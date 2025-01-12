@@ -15,7 +15,7 @@ public class HealthBar : MonoBehaviour
     private void Start()
     {
         IDestroyableEntity destroyableEntity = displayingEntityHealth.Reference;
-        destroyableEntity.vitality.onHealthChange += HealthChanged;
+        destroyableEntity.vitality.onHealthPercentChanges += HealthChanged;
         destroyableEntity.onDie += HideBar;
 
         progressBar.SetProgress(destroyableEntity.vitality.hpPercent);

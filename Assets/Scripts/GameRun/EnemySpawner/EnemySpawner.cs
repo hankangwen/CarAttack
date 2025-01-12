@@ -14,52 +14,84 @@ public class EnemySpawner : MonoBehaviour
     private Car car;
     private GameObjectsPool<StickmanEnemy> enemyPool;
     private LinkedList<EnemyLine> enemyLines;
+
+    private Coroutine spawnRoutine;
     public void Init(Car car)
     {
         this.car = car;
         enemyPool = new GameObjectsPool<StickmanEnemy>(enemyPrefab, 30);
     }
 
-    public void StartSpawning(Vector3 spawnOrigin)
+    public void StartSpawning(Vector3 spawnOrigin, float mapEnd)
     {
+        if (spawnRoutine != null) throw new System.Exception("EnemySpawner.StartSpawning cant start spawning twice");
         enemyLines = new LinkedList<EnemyLine>();
-        SpawnLinesWhileInGenDist(spawnOrigin, spawnOrigin);
+        SpawnLinesWhileInGenDist(spawnOrigin, spawnOrigin, mapEnd);
+        spawnRoutine = StartCoroutine(Spawning(spawnOrigin, mapEnd));
     }
 
-    public void CustomUpdate(float deltaTime)
+    private IEnumerator Spawning(Vector3 spawnOrigin, float genStopDistance)
     {
-        //deleting last
-        EnemyLine lastLine = enemyLines.Last.Value;
-        if(lastLine.position.z - car.transform.position.z < -distForEnemiesToDissappear)
+        EnemyLine firstLine;
+        do
         {
-            lastLine.ClearLine(enemyPool);
-            enemyLines.RemoveLast();
-        }
-        //appending first
-        EnemyLine firstLine = enemyLines.First.Value;
-        if (firstLine.position.z - car.transform.position.z < distForEnemiesToGen)
-        {
-            SpawnLinesWhileInGenDist(firstLine.position + new Vector3(0, 0, distanceBetweenLines),
-                car.transform.position);
-        }
+            //deleting last
+            EnemyLine lastLine = enemyLines.Last.Value;
+            if (lastLine.position.z - car.transform.position.z < -distForEnemiesToDissappear)
+            {
+                lastLine.ClearLine(enemyPool);
+                enemyLines.RemoveLast();
+            }
+            //appending first
+            firstLine = enemyLines.First.Value;
+            if (firstLine.position.z - car.transform.position.z < distForEnemiesToGen)
+            {
+                SpawnLinesWhileInGenDist(firstLine.position + new Vector3(0, 0, distanceBetweenLines),
+                    car.transform.position, genStopDistance);
+            }
+            yield return new WaitForEndOfFrame();
+        } while (Mathf.Abs(firstLine.position.z - spawnOrigin.z) < genStopDistance);
+        Debug.Log("finished spawning");
     }
 
-    private void SpawnLinesWhileInGenDist(Vector3 spawnOrigin, Vector3 pointToCalcDist)
+    public void StopSpawningAndClearEnemies()
+    {
+        foreach (EnemyLine line in enemyLines)
+        {
+            foreach (var enemy in line.enemies)
+            {
+                if(enemy.vitality.hp > 0) enemy.Die();
+            }
+            line.ClearLine(enemyPool);
+        }
+        enemyLines.Clear();
+        StopCoroutine(spawnRoutine);
+        spawnRoutine = null;
+    }
+
+    private void SpawnLinesWhileInGenDist(Vector3 spawnOrigin, Vector3 pointToCalcDist,
+        float genStopDistance)
     {
         Vector3 linePos = spawnOrigin;
-        while (Mathf.Abs(pointToCalcDist.z - linePos.z) < distForEnemiesToGen)
+        while (Mathf.Abs(pointToCalcDist.z - linePos.z) < distForEnemiesToGen 
+            && Mathf.Abs(linePos.z - spawnOrigin.z) < genStopDistance)
         {
             EnemyLine enemyLine = new EnemyLine(linePos);
-            int enemyCount = Random.Range(0, maxEnemiesCountOnLine);
+            
+            int enemyCount = Random.Range(1, maxEnemiesCountOnLine + 1);
+            float xPosOffsetDrag = (maxEnemyXOffset * 2)/ enemyCount;
+            float xPosOffset = -maxEnemyXOffset;
             while (enemyCount > 0)
             {
                 StickmanEnemy enemyToAdd = enemyPool.Get();
                 enemyLine.enemies.Add(enemyToAdd);
+                enemyToAdd.transform.Rotate(new Vector3(0,Random.Range(0,360),0));
                 enemyToAdd.transform.position = linePos +
-                    new Vector3(Random.Range(-maxEnemyXOffset, maxEnemyXOffset), 0);
+                    new Vector3(Random.Range(xPosOffset, xPosOffset + xPosOffsetDrag), 0);
                 enemyToAdd.Activate();
                 enemyToAdd.vitality.HealToMax();
                 enemyCount--;
+                xPosOffset += xPosOffsetDrag;
             }
             enemyLines.AddFirst(enemyLine);
             linePos += new Vector3(0, 0, distanceBetweenLines);

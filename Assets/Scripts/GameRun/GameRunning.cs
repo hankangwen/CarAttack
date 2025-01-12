@@ -1,58 +1,91 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.ConstrainedExecution;
 using UnityEngine;
 
 public class GameRunning : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private float enemyStartSpawnDist;
+    [SerializeField] private float distFromEndToStopEnemySpawn = 20;
     [SerializeField] private EnvironmentGenerator mapGenerator;
     [SerializeField] private EnemySpawner enemySpawner;
+    [SerializeField] private ScreensSwitcher screenSwitcher;
 
     private Coroutine gameRunRoutine;
 
-    private void Start()
+    private Car car;
+    private CarController carController;
+    private CameraController camControler;
+
+    public Action<float> onGameStarts;
+    public Action<float> onRunProgressChange;
+    public void Init(Car car, CarController carController, CameraController camControler)
     {
-        CarController carController = FindObjectOfType<CarController>();
-        CameraController camControler = FindObjectOfType<CameraController>();
-        Car car = carController.GetComponent<Car>();
+        this.car = car;
+        this.carController = carController;
+        this.camControler = camControler;
         camControler.Init(car);
         mapGenerator.Init(car);
         mapGenerator.GenerateMap(transform.position);
         enemySpawner.Init(car);
-        StartRun(car, carController, camControler);
     }
 
-    public void StartRun(Car car, CarController carController, CameraController camControler)
+    public void StartRun(float runLength)
     {
-        if (gameRunRoutine != null) throw new System.Exception("Map.StartRun failed. Cant start GameRunningRoutine twoce");
-        gameRunRoutine = StartCoroutine(GameRunningRoutine(car, carController, camControler));
+        if (gameRunRoutine != null) throw new Exception("Map.StartRun failed. Cant start GameRunningRoutine twoce");
+        onGameStarts?.Invoke(runLength);
+        gameRunRoutine = StartCoroutine(GameRunningRoutine(runLength));
     }
 
-    private IEnumerator GameRunningRoutine(Car car, CarController carController, CameraController camControler)
+    private IEnumerator GameRunningRoutine(float runLength)
     {
-        bool stopGame = false;
-        Action stopGameAction = () => stopGame = true;
-        Vector3 targetCarPosition = carController.transform.position;
-        enemySpawner.StartSpawning(transform.position + new Vector3(0,0, enemyStartSpawnDist));
+        bool gameFinished = false;
+        Action stopGameAction = () =>
+        {
+            GameLoosed();
+            gameFinished = true;
+        };
+        Vector3 targetCarPosition = transform.position + new Vector3(0,0, runLength);
+        enemySpawner.StartSpawning(transform.position + new Vector3(0,0, enemyStartSpawnDist), runLength - distFromEndToStopEnemySpawn);
         car.onDie += stopGameAction;
+        yield return camControler.moveToCarFollowingPositionAndRotation();
+
         camControler.StartFollowingCar();
+        carController.MoveToDestination(targetCarPosition, moveSpeed, () =>
+        {
+            GameWon();
+            gameFinished = true;
+        });
         car.Activate();
         do
         {
             float deltaTime = Time.deltaTime;
-
-            targetCarPosition += new Vector3(0, 0, moveSpeed * deltaTime);
-            carController.Move(targetCarPosition, deltaTime);
             mapGenerator.CustomUpdate(deltaTime);
-            enemySpawner.CustomUpdate(deltaTime);
-            if(stopGame) break;
+            onRunProgressChange?.Invoke(Mathf.Lerp(0, 1, (car.transform.position.z - transform.position.z)/runLength));
+            if (gameFinished)
+            {
+                car.onDie -= stopGameAction;
+                break;
+            }
             yield return new WaitForEndOfFrame();
         } while (true);
+        gameRunRoutine = null;
+    }
+
+    public void GameLoosed()
+    {
+        carController.Stop();
         camControler.StopFollowingCar();
         car.Deactivate();
-        car.onDie -= stopGameAction;
+        screenSwitcher.SwitchScreen(UIScreeen.LooseWindow);
+    }
+
+    public void GameWon()
+    {
+        enemySpawner.StopSpawningAndClearEnemies();
+        camControler.StopFollowingCar();
+        car.Deactivate();
+        car.ResetCar();
+        screenSwitcher.SwitchScreen(UIScreeen.WinWindow);
     }
 }

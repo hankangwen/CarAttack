@@ -4,6 +4,7 @@ using UnityEngine;
 public class EnvironmentGenerator : MonoBehaviour
 {
     [SerializeField] private MapCell mapCellPrefab;
+    [SerializeField] private MapCell mapEndCellPrefab;
     [SerializeField] private int requiredForwardCells = 5;
     [SerializeField] private int requiredBackwardCells = 1;
     private Car car;

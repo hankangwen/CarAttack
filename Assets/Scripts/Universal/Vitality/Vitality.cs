@@ -11,11 +11,17 @@ public class Vitality
     /// <summary>
     /// return hp percent (0 - no hp, 1 - full hp)
     /// </summary>
-    public Action<float> onHealthChange { get; set; }
+    public Action<float> onHealthPercentChanges { get; set; }
+    public Action<float> onRecieveDamage { get; set; }
     public Action onHealthFinishes { get; set; }
     public float hpPercent => hp / maxHp;
     public void Init()
     {
+        hp = maxHp;
+    }
+    public void Init(float maxHp)
+    {
+        this.maxHp = maxHp;
         hp = maxHp;
     }
 
@@ -23,13 +29,15 @@ public class Vitality
     {
         if (damage == 0) return;
         hp -= damage;
-        if(hp <= 0)
+        onRecieveDamage?.Invoke(damage);
+        if (hp <= 0)
         {
             hp = 0;
-            onHealthChange?.Invoke(0);
+            onHealthPercentChanges?.Invoke(0);
             onHealthFinishes?.Invoke();
         }
-        else onHealthChange?.Invoke(hp / maxHp);
+        else onHealthPercentChanges?.Invoke(hp / maxHp);
+        
     }
 
     public void HealToMax()
@@ -44,8 +52,8 @@ public class Vitality
         if (hp > maxHp)
         {
             hp = maxHp;
-            onHealthChange?.Invoke(1);
+            onHealthPercentChanges?.Invoke(1);
         }
-        else onHealthChange?.Invoke(hp / maxHp);
+        else onHealthPercentChanges?.Invoke(hp / maxHp);
     }
 }
