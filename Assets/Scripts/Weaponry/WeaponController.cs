@@ -64,7 +64,7 @@ public class WeaponController : MonoBehaviour
             float rotationAmount = inputDelta.x * rotationSpeed * Time.deltaTime;
             foreach (Gun gun in controlledGuns)
             {
-                gun.transform.Rotate(0, rotationAmount, 0);
+                gun.Rotate(0, rotationAmount, 0);
             }
 
             lastTouchPosition = currentInputPosition;
@@ -96,7 +96,7 @@ public class WeaponController : MonoBehaviour
                         float rotationAmount = touchDelta.x * rotationSpeed * Time.deltaTime;
                         foreach (Gun gun in controlledGuns)
                         {
-                            gun.transform.Rotate(0, rotationAmount, 0);
+                            gun.Rotate(0, rotationAmount, 0);
                         }
 
                         lastTouchPosition = touch.position;

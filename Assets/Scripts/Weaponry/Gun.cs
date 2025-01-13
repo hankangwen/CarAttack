@@ -11,6 +11,10 @@ public class Gun : MonoBehaviour
     [SerializeField] private float shootSpeed = 0.7f;
     [SerializeField] private float damage;
 
+    [SerializeField] private float angleRestrictions = 80;
+    [SerializeField] private GameObject laserPointer;
+
+    private float localY;
     private bool active;
     private float shootTimer;
     private Car car;
@@ -31,6 +35,7 @@ public class Gun : MonoBehaviour
     {
         if (active) return;
         controller.RegisterGun(this);
+        laserPointer.SetActive(true);
         active = true;
     }
 
@@ -38,6 +43,7 @@ public class Gun : MonoBehaviour
     {
         if (!active) return;
         controller.UnregisterGun(this);
+        laserPointer.SetActive(false);
         transform.DORotateQuaternion(Quaternion.identity,0.5f);
         active = false;
     }
@@ -48,6 +54,13 @@ public class Gun : MonoBehaviour
         Vector3 targetLoockDir = position - transform.position;
         targetLoockDir.y = 0;
         transform.rotation = Quaternion.LookRotation(targetLoockDir);
+    }
+
+    public void Rotate(float x, float y, float z)
+    {
+        if (localY + y <= -angleRestrictions || localY + y >= angleRestrictions) return;
+        localY += y;
+        transform.Rotate(0, y, 0);
     }
     
     private void Update()
