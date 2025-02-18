@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using UnityEditor;
 using UnityEngine;
 
@@ -14,3 +16,5 @@ public class InterfaceReferenceDrawer : PropertyDrawer
         EditorGUI.EndProperty();
     }
 }
+
+#endif
