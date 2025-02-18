@@ -44,7 +44,8 @@ public class StickmanEnemy : MonoBehaviour, IPooledObject, IDestroyableEntity, I
     {
         _stateMachine.Stop();
         animator.Rebind();
-        animator.Update(0f);
+        if(animator.isActiveAndEnabled)
+            animator.Update(0f);
         gameObject.SetActive(false);
     }
 
